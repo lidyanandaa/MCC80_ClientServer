@@ -2,7 +2,7 @@
 {
     public class Room
     {
-        public int Guid { get; set; }
+        public Guid Guid { get; set; }
         public string Name { get; set; }
         public int Floor { get; set; }
         public int Capacity { get; set; }

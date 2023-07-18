@@ -2,12 +2,12 @@
 {
     public class Education
     {
-        public int Guid { get; set; }
+        public Guid Guid { get; set; }
         public string Major { get; set; }
         public string Degree { get; set; }
         public float Gpa { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
-        public int UniversityGuid { get; set; }
+        public Guid UniversityGuid { get; set; }
     }
 }

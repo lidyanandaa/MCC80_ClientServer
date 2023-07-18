@@ -2,10 +2,10 @@
 {
     public class AccountRole
     {
-        public int Guid { get; set; }
+        public Guid Guid { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
-        public int AccountGuid { get; set; }
-        public int RoleGuid { get; set; }
+        public Guid AccountGuid { get; set; }
+        public Guid RoleGuid { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class Account
     {
-        public int Guid { get; set; }
+        public Guid Guid { get; set; }
         public string Password { get; set; }
         public int Otp { get; set; }
         public bool IsUsed { get; set; }

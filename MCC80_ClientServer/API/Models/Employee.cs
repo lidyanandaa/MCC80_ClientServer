@@ -2,7 +2,7 @@
 {
     public class Employee
     {
-        public int Guid { get; set; }
+        public Guid Guid { get; set; }
         public string Nik { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }

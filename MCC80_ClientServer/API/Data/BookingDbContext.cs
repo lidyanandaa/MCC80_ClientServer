@@ -39,6 +39,7 @@ namespace API.Data
                         .HasMany(u => u.Educations)
                         .WithOne(e => e.University)
                         .HasForeignKey(e => e.UniversityGuid);
+                        //.OnDelete(DeleteBehavior.Restrict); //untuk melkaukan hapus
 
             //Many booking with one room (N:1)
             modelBuilder.Entity<Booking>()

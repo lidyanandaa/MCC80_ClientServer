@@ -1,12 +1,13 @@
 ﻿using API.DTOs.Universities;
 using API.Models;
 using API.Utilities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs.Employees
 {
     public class NewEmployeeDto
     {
-        public string Nik { get; set; }
+        //public string Nik { get; set; }
         public string FirstName { get; set; }
         public string? LastName { get; set; }
         public DateTime BirthDate { get; set; }
@@ -20,7 +21,7 @@ namespace API.DTOs.Employees
             return new Employee
             {
                 Guid = new Guid(),
-                Nik = newEmployeeDto.Nik,
+                //Nik = newEmployeeDto.Nik,
                 FirstName = newEmployeeDto.FirstName,
                 LastName = newEmployeeDto.LastName,
                 BirthDate = newEmployeeDto.BirthDate,
@@ -37,7 +38,7 @@ namespace API.DTOs.Employees
         {
             return new NewEmployeeDto
             {
-                Nik = employee.Nik,
+                //Nik = employee.Nik,
                 FirstName = employee.FirstName,
                 LastName = employee.LastName,
                 BirthDate = employee.BirthDate,

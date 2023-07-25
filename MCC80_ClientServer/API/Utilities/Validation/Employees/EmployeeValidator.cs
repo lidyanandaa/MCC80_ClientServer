@@ -1,5 +1,4 @@
 ﻿using API.Contracts;
-using API.DTOs.Accounts;
 using API.DTOs.Employees;
 using API.Repositories;
 using FluentValidation;
@@ -35,23 +34,13 @@ namespace API.Utilities.Validation.Employees
 
             RuleFor(e => e.Email)
                 .NotEmpty().WithMessage("Email is required")
-                .EmailAddress().WithMessage("Email is not valid")
-                //panggil method IsDDuplicationValue agar data tidak ada yg sama
-                .Must(IsDuplicationValue).WithMessage("Email already exist");
+                .EmailAddress().WithMessage("Email is not valid");
 
             RuleFor(e => e.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(20)
                 //membuat karakter nomor agar inputan awal memkai kode negara +62, menggunakan regex
-                .Matches(@"^\+[0-9]")
-                //panggil method IsDDuplicationValue agar data tidak ada yg sama
-                .Must(IsDuplicationValue).WithMessage("Phone number already exist");
-        }
-
-        //agar data tidak ada yg duplikasi, untuk email dan password
-        private bool IsDuplicationValue(string arg)
-        {
-            return _employeeRepository.IsNotExist(arg);
+                .Matches(@"^\+[0-9]");
         }
     }
 }

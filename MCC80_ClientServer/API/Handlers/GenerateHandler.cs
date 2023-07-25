@@ -10,7 +10,7 @@
              int[] nikDigits = new int[16];
              for (int i = 0; i < 16; i++)
              {
-                 nikDigits[i] = random.Next(6); // Generates a random digit between 0 and 9.
+                 nikDigits[i] = random.Next(10); // Generates a random digit between 0 and 9.
              }
 
              // Format the NIK (Indonesia's NIK might have specific rules for each region).

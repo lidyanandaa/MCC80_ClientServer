@@ -25,6 +25,7 @@ namespace API.Utilities.Validation.Employees
 
             RuleFor(e => e.Gender)
                 .NotNull()
+                //diambil dari utilities/enum/genderlevel.cs
                 .IsInEnum();
 
             RuleFor(e => e.HiringDate)
@@ -33,12 +34,15 @@ namespace API.Utilities.Validation.Employees
             RuleFor(e => e.Email)
                 .NotEmpty().WithMessage("Email is required")
                 .EmailAddress().WithMessage("Email is not valid")
+                //panggil method IsDDuplicationValue agar data tidak ada yg sama
                 .Must(IsDuplicationValue).WithMessage("Email already exist");
 
             RuleFor(e => e.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(20)
+                //membuat karakter nomor agar inputan awal memkai kode negara +62, menggunakan regex
                 .Matches(@"^\+[0-9]")
+                //panggil method IsDDuplicationValue agar data tidak ada yg sama
                 .Must(IsDuplicationValue).WithMessage("Phone number already exist");
         }
 

@@ -20,7 +20,8 @@
 
             if (nik == null)
             {
-                return "111111";
+             //Untuk memasukkan data pertama kali
+             return "111111";
             }
 
             var generatedNik = int.Parse(nik) + 1;

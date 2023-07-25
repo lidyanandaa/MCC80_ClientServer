@@ -18,6 +18,7 @@ namespace API.Utilities.Validation.Bookings
                 .GreaterThanOrEqualTo(b => b.StartDate.AddHours(1));
             RuleFor(b => b.Status)
                 .NotNull()
+                //diambil dari utilities/enum/statuslevel.cs
                 .IsInEnum();
             RuleFor(b => b.Remarks)
                 .NotEmpty();

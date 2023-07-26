@@ -1,8 +1,10 @@
 ﻿using API.DTOs.Universities;
 using API.Models;
 using API.Services;
+using API.Utilities.Handlers;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
+using System.Net;
 
 namespace API.Controllers
 {
@@ -23,10 +25,21 @@ namespace API.Controllers
             var result = _universityService.GetAll();
             if (!result.Any())
             {
-                return NotFound("No Data Found");
+                return NotFound(new ResponseHandler<IEnumerable<UniversityDto>>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found"
+                });
             }
 
-            return Ok(result);
+            return Ok(new ResponseHandler<IEnumerable<UniversityDto>>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success retrieve data",
+                Data = result
+            });
         }
 
         [HttpGet("{guid}")]
@@ -35,10 +48,22 @@ namespace API.Controllers
             var result = _universityService.GetByGuid(guid);
             if (result is null)
             {
-                return NotFound("Guid is not found");
+                return NotFound(new ResponseHandler<UniversityDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found", 
+                    Data = result
+                });
             }
 
-            return Ok(result);  
+            return Ok(new ResponseHandler<UniversityDto>
+            {
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Success retrieve data", 
+                    Data = result
+            });  
         }
 
         [HttpPost]
@@ -56,7 +81,12 @@ namespace API.Controllers
 
             if (result is null)
             {
-                return StatusCode(500, "Error Retrieve from database");
+                return StatusCode(500, new ResponseHandler<NewUniversityDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Error retrieve from database"
+                });
             }
 
             //Mapping manual
@@ -65,7 +95,13 @@ namespace API.Controllers
             universityDto.Code = result.Code;
             universityDto.Name = result.Name;*/
 
-            return Ok(result);
+            return Ok(new ResponseHandler<NewUniversityDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success retrieve data",
+                Data = newUniversityDto
+            });
         }
 
         [HttpPut]
@@ -75,15 +111,30 @@ namespace API.Controllers
 
             if (result is -1)
             {
-                return NotFound("Guid is not found");
+                return NotFound(new ResponseHandler<UniversityDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found"
+                });
             }
 
             if (result is 0)
             {
-                return StatusCode(500, "Error Retrieve from database");
+                return StatusCode(500, new ResponseHandler<UniversityDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Error retrieve from database"
+                });
             }
 
-            return Ok("Update success");
+            return Ok(new ResponseHandler<UniversityDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success update data"
+            });
         }
 
         [HttpDelete]
@@ -93,15 +144,30 @@ namespace API.Controllers
 
             if (result is -1)
             {
-                return NotFound("Guid is not found");
+                return NotFound(new ResponseHandler<UniversityDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found"
+                });
             }
 
             if (result is 0)
             {
-                return StatusCode(500, "Error Retrieve from database");
+                return StatusCode(500, new ResponseHandler<UniversityDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Error retrieve from database"
+                });
             }
 
-            return Ok("Delete success");
+            return Ok(new ResponseHandler<UniversityDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success delete data"
+            });
         }
     }
 }

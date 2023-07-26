@@ -7,7 +7,7 @@ namespace API.Utilities.Validation.Accounts
 {
     public class NewAccountValidator : AbstractValidator<NewAccountDto>
     {
-        private readonly IAccountRepository _accountRepositoryu;
+        private readonly IAccountRepository _accountRepository;
         public NewAccountValidator(IAccountRepository accountRepository)
         {
             RuleFor(a => a.Password)

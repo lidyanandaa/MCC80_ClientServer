@@ -1,4 +1,4 @@
-﻿namespace API.Handlers
+﻿namespace API.Utilities.Handlers
 {
     public class GenerateHandler
     {
@@ -18,10 +18,10 @@
 
              return formattedNIK;*/
 
-            if (nik == null)
+            if (string.IsNullOrEmpty(nik))
             {
-             //Untuk memasukkan data pertama kali
-             return "111111";
+                //Untuk memasukkan data pertama kali
+                return "111111";
             }
 
             var generatedNik = int.Parse(nik) + 1;

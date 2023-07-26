@@ -1,7 +1,10 @@
 ﻿using API.DTOs.Accounts;
+using API.DTOs.Universities;
 using API.Models;
 using API.Services;
+using API.Utilities.Handlers;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace API.Controllers
 {
@@ -22,10 +25,21 @@ namespace API.Controllers
             var result = _accountService.GetAll();
             if (!result.Any())
             {
-                return NotFound("No Data Found");
+                return NotFound(new ResponseHandler<IEnumerable<AccountDto>>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found"
+                });
             }
 
-            return Ok(result);
+            return Ok(new ResponseHandler<IEnumerable<AccountDto>>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success retrieve data",
+                Data = result
+            });
         }
 
         [HttpGet("{guid}")]
@@ -34,10 +48,22 @@ namespace API.Controllers
             var result = _accountService.GetByGuid(guid);
             if (result is null)
             {
-                return NotFound("Guid is not found");
+                return NotFound(new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found",
+                    Data = result
+                });
             }
 
-            return Ok(result);
+            return Ok(new ResponseHandler<AccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success retrieve data",
+                Data = result
+            });
         }
 
         [HttpPost]
@@ -46,10 +72,21 @@ namespace API.Controllers
             var result = _accountService.Create(newAccountDto);
             if (result is null)
             {
-                return StatusCode(500, "Error Retrieve from database");
+                return StatusCode(500, new ResponseHandler<NewAccountDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Error retrieve from database"
+                });
             }
 
-            return Ok(result);
+            return Ok(new ResponseHandler<NewAccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success retrieve data",
+                Data = newAccountDto
+            });
         }
 
         [HttpPut]
@@ -59,15 +96,30 @@ namespace API.Controllers
 
             if (result is -1)
             {
-                return NotFound("Guid is not found");
+                return NotFound(new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found"
+                });
             }
 
             if (result is 0)
             {
-                return StatusCode(500, "Error Retrieve from database");
+                return StatusCode(500, new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Error retrieve from database"
+                });
             }
 
-            return Ok("Update success");
+            return Ok(new ResponseHandler<AccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success update data"
+            });
         }
 
         [HttpDelete]
@@ -78,15 +130,90 @@ namespace API.Controllers
 
             if (result is -1)
             {
-                return NotFound("Guid is not found");
+                return NotFound(new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is not found"
+                });
             }
 
             if (result is 0)
             {
-                return StatusCode(500, "Error Retrieve from database");
+                return StatusCode(500, new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Error retrieve from database"
+                });
             }
 
-            return Ok("Delete success");
+            return Ok(new ResponseHandler<AccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success delete data"
+            });
+        }
+
+        [HttpPost("login")] //kenapa login pake http post karena ada validasi untuk inputannya
+        public IActionResult Login(LoginDto loginDto)
+        {
+            var result = _accountService.Login(loginDto);
+
+            if (result is 0)
+            {
+                return NotFound(new ResponseHandler<LoginDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Email or Password is incorrect"
+                });
+            }
+
+            return Ok(new ResponseHandler<LoginDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Login Success"
+            });
+        }
+
+        [HttpPost("register")]
+        public IActionResult Register(RegisterDto registerDto)
+        {
+            int result = _accountService.Register(registerDto);
+
+            if (result == 0)
+            {
+                // Jika pendaftaran gagal, kirim respons dengan status 400 Bad Request
+                return BadRequest(new ResponseHandler<RegisterDto>
+                {
+                    Code = StatusCodes.Status400BadRequest,
+                    Status = HttpStatusCode.BadRequest.ToString(),
+                    Message = "Email or PhoneNumber is already registered."
+                });
+            }
+            else if (result == 1)
+            {
+                // Jika pendaftaran berhasil, kirim respons dengan status 200 OK
+                return Ok(new ResponseHandler<RegisterDto>
+                {
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Registration Success."
+                });
+            }
+            else
+            {
+                // Jika terjadi kesalahan lain, kirim respons dengan status 500 Internal Server Error
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHandler<RegisterDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.InternalServerError.ToString(),
+                    Message = "Error retrieve from database."
+                });
+            }
         }
     }
 }

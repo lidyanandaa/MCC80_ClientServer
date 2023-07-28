@@ -11,5 +11,12 @@ namespace API.Repositories
         {
 
         }
+
+        public IEnumerable<Education> GetByName(string major)
+        {
+            return _context.Set<Education>()
+                           .Where(education => education.Major.Contains(major))
+                           .ToList();
+        }
     }
 }

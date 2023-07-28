@@ -2,34 +2,43 @@
 using API.Data;
 using API.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.X509Certificates;
 
-namespace API.Repositories
+namespace API.Repositories;
+
+public class EmployeeRepository : GeneralRepository<Employee>, IEmployeeRepository
 {
-    public class EmployeeRepository : GeneralRepository<Employee>, IEmployeeRepository
+    public EmployeeRepository(BookingDbContext context) : base(context) { }
+
+    public IEnumerable<Employee> GetByName(string name)
     {
-        public EmployeeRepository(BookingDbContext context) : base(context)
-        {
-           
-        }
+        return _context.Set<Employee>()
+                       .Where(employee => employee.FirstName.Contains(name))
+                       .ToList();
+    }
 
-        public bool IsNotExist(string value)
-        {
-            return _context.Set<Employee>()
-                       .SingleOrDefault(e => e.Email.Contains(value)
-                       || e.PhoneNumber.Contains(value)) is null;
-        }
+    public bool isNotExist(string value)
+    {
+        return _context.Set<Employee>().SingleOrDefault(e => e.PhoneNumber.Contains(value) || e.Email.Contains(value)) is null;
+        //return _context.Set<Employee>().SingleOrDefault(e => e.Email == value || e.PhoneNumber == value) is null;
+    }
 
-        public string GetLastNik()
-        {
-            return _context.Set<Employee>().ToList().LastOrDefault()?.Nik;
-        }
+    public string GetAutoNik()
+    {
+        return _context.Set<Employee>().ToList().LastOrDefault()?.Nik;
+    }
 
-        public Employee? GetByEmail(string email)
-        {
-            return _context.Set<Employee>().SingleOrDefault(e => e.Email.Contains(email));
-        }
+    public Employee? GetByEmail(string email)
+    {
+        return _context.Set<Employee>().SingleOrDefault(e => e.Email.Contains(email));
+    }
 
+    public Employee? CheckEmail(string email)
+    {
+        return _context.Set<Employee>().FirstOrDefault(u => u.Email == email);
+    }
+
+    public Guid GetLastEmployeeGuid()
+    {
+        return _context.Set<Employee>().ToList().LastOrDefault().Guid;
     }
 }
-    

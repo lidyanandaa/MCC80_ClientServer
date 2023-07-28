@@ -2,8 +2,8 @@
 {
     public class GenerateHandler
     {
-        public static string Nik(string? nik = null)
-        {
+        //public static string Nik(string? nik = null)
+        //{
             /* Random random = new Random();
 
              // Generate random digits for the NIK (assumes a 16-digit NIK).
@@ -17,16 +17,21 @@
              string formattedNIK = string.Join("", nikDigits);
 
              return formattedNIK;*/
+        //}
 
-            if (string.IsNullOrEmpty(nik))
-            {
-                //Untuk memasukkan data pertama kali
-                return "111111";
-            }
+        private static int lastNik = 11111; // NIK terakhir, ganti dengan NIK terakhir yang sesuai
 
-            var generatedNik = int.Parse(nik) + 1;
+        public static string Nik(string? nik = null)
+        {
+            // Tambahkan 1 pada NIK terakhir untuk mendapatkan NIK berikutnya
+            lastNik++;
 
-            return generatedNik.ToString();
+            // Format angka menjadi 5 digit dengan leading zeros jika diperlukan
+            string nextSerialFormatted = lastNik.ToString("D5");
+
+            // Buat NIK baru berdasarkan NIK terakhir dan serial berikutnya
+            string NIK = nextSerialFormatted;
+            return NIK;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using API.DTOs.Bookings;
+using API.DTOs.Rooms;
 using API.DTOs.Universities;
 using API.Models;
 using API.Services;
@@ -155,6 +156,98 @@ namespace API.Controllers
                 Code = StatusCodes.Status200OK,
                 Status = HttpStatusCode.OK.ToString(),
                 Message = "Success delete data"
+            });
+        }
+
+        [HttpGet("free-room-today")]
+        public IActionResult FreeRoomsToday()
+        {
+            var result = _bookingService.FreeRoomsToday();
+            if (result is null)
+            {
+                return NotFound(new ResponseHandler<RoomDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Room not found"
+                });
+            }
+            return Ok(new ResponseHandler<IEnumerable<RoomDto>>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Succes retrivieng data",
+                Data = result
+            });
+        }
+
+        [HttpGet("booking-length-time")]
+        public IActionResult BookingLength()
+        {
+            var result = _bookingService.BookingLength();
+            if (!result.Any())
+            {
+                return NotFound(new ResponseHandler<BookingLengthDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Room not found"
+                });
+            }
+
+            return Ok(
+                new ResponseHandler<IEnumerable<BookingLengthDto>>
+                {
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Success retrieving data",
+                    Data = result
+                });
+        }
+
+        [HttpGet("detail-booking")]
+        public IActionResult GetAllDetail()
+        {
+            var result = _bookingService.GetALl();
+            if (!result.Any())
+            {
+                return NotFound(new ResponseHandler<BookingDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Data is not found"
+                });
+            }
+
+            return Ok(new ResponseHandler<IEnumerable<DetailBookingDto>>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success retrieve data",
+                Data = result
+            });
+        }
+
+        [HttpGet("booking-detail/{guid}")]
+        public IActionResult GetAllDetailBooking(Guid guid)
+        {
+            var result = _bookingService.GetDetailBookingByGuid(guid);
+            if (result is null)
+            {
+                return NotFound(new ResponseHandler<DetailBookingDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "data not found"
+                });
+            }
+
+            return Ok(new ResponseHandler<DetailBookingDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success retrieve data",
+                Data = result
             });
         }
     }

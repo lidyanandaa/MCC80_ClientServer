@@ -3,6 +3,7 @@ using API.Data;
 using API.Models;
 using API.Repositories;
 using API.Services;
+using API.Utilities.Handlers;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,13 @@ builder.Services.AddScoped<EducationService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<AccountRoleService>();
 builder.Services.AddScoped<AccountService>();
+
+// Add SmtpClient to the container.
+builder.Services.AddTransient<IEmailHandler, EmailHandler>(_ => new EmailHandler(
+    builder.Configuration["EmailService:SmtpServer"],
+    int.Parse(builder.Configuration["EmailService:SmtpPort"]),
+    builder.Configuration["EmailService:FromEmailAddress"]
+));
 
 // Register FluentValidation
 builder.Services.AddFluentValidationAutoValidation()

@@ -22,7 +22,7 @@ namespace API.Utilities.Validation.Accounts
             RuleFor(Accounts => Accounts.Password)
                 .NotEmpty()
                 .WithMessage("Password is required")
-                .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$");
+                .Matches(@"(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$");
             RuleFor(Accounts => Accounts.NewPassword)
                 .NotEmpty().Equal(Accounts => Accounts.Password);
 

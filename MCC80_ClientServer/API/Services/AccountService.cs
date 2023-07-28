@@ -15,14 +15,16 @@ namespace API.Services
         private readonly IEducationRepository _educationRepository;
         private readonly IUniversityRepository _universityRepository;
         private readonly BookingDbContext _dbContext;
+        private readonly IEmailHandler _emailHandler;
 
-        public AccountService(IAccountRepository accountRepository, IEmployeeRepository employeeRepository, IEducationRepository educationRepository, IUniversityRepository universityRepository, BookingDbContext dbContext)
+        public AccountService(IAccountRepository accountRepository, IEmployeeRepository employeeRepository, IEducationRepository educationRepository, IUniversityRepository universityRepository, BookingDbContext dbContext , IEmailHandler emailHandler)
         {
             _accountRepository = accountRepository;
             _employeeRepository = employeeRepository;
             _educationRepository = educationRepository;
             _universityRepository = universityRepository;
             _dbContext = dbContext;
+            _emailHandler = emailHandler;
         }
 
         public bool Login(LoginDto loginDto)
@@ -146,7 +148,7 @@ namespace API.Services
             {
                 return -1; // error update
             }
-
+            _emailHandler.SendEmail(forgotPasswordDto.Email, "OTP", $"Your OTP id {otp}");
             return 1;
         }
 
@@ -161,6 +163,7 @@ namespace API.Services
             {
                 return 0;
             }
+            var hashedPassword = HashingHandler.GenerateHash(changePasswordDto.Password);
             var account = new Account
             {
                 Guid = getAccount.Guid,
@@ -169,7 +172,7 @@ namespace API.Services
                 CreatedDate = getAccount.CreatedDate,
                 Otp = getAccount.Otp,
                 ExpiredTime = getAccount.ExpiredTime,
-                Password = HashingHandler.GenerateHash(changePasswordDto.Password),
+                Password = hashedPassword,
             };
 
             if (getAccount.Otp != changePasswordDto.OTP)

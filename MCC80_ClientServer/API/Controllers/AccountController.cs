@@ -1,5 +1,6 @@
-﻿using API.DTOs.Accounts;
-using API.DTOs.Universities;
+﻿using API.Contracts;
+using API.DTOs.AccountDto;
+using API.DTOs.Accounts;
 using API.Models;
 using API.Services;
 using API.Utilities.Handlers;
@@ -10,160 +11,22 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
+
     public class AccountController : ControllerBase
     {
         private readonly AccountService _accountService;
-        private readonly EmployeeService _employeeService;
 
-        public AccountController(AccountService accountService, EmployeeService employee)
+        public AccountController(AccountService accountService)
         {
             _accountService = accountService;
-            _employeeService = employee;
         }
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var result = _accountService.GetAll();
-            if (!result.Any())
-            {
-                return NotFound(new ResponseHandler<IEnumerable<AccountDto>>
-                {
-                    Code = StatusCodes.Status404NotFound,
-                    Status = HttpStatusCode.NotFound.ToString(),
-                    Message = "Guid is not found"
-                });
-            }
-
-            return Ok(new ResponseHandler<IEnumerable<AccountDto>>
-            {
-                Code = StatusCodes.Status200OK,
-                Status = HttpStatusCode.OK.ToString(),
-                Message = "Success retrieve data",
-                Data = result
-            });
-        }
-
-        [HttpGet("{guid}")]
-        public IActionResult GetByGuid(Guid guid)
-        {
-            var result = _accountService.GetByGuid(guid);
-            if (result is null)
-            {
-                return NotFound(new ResponseHandler<AccountDto>
-                {
-                    Code = StatusCodes.Status404NotFound,
-                    Status = HttpStatusCode.NotFound.ToString(),
-                    Message = "Guid is not found",
-                    Data = result
-                });
-            }
-
-            return Ok(new ResponseHandler<AccountDto>
-            {
-                Code = StatusCodes.Status200OK,
-                Status = HttpStatusCode.OK.ToString(),
-                Message = "Success retrieve data",
-                Data = result
-            });
-        }
-
-        [HttpPost]
-        public IActionResult Insert(NewAccountDto newAccountDto)
-        {
-            var result = _accountService.Create(newAccountDto);
-            if (result is null)
-            {
-                return StatusCode(500, new ResponseHandler<NewAccountDto>
-                {
-                    Code = StatusCodes.Status500InternalServerError,
-                    Status = HttpStatusCode.OK.ToString(),
-                    Message = "Error retrieve from database"
-                });
-            }
-
-            return Ok(new ResponseHandler<NewAccountDto>
-            {
-                Code = StatusCodes.Status200OK,
-                Status = HttpStatusCode.OK.ToString(),
-                Message = "Success retrieve data",
-                Data = newAccountDto
-            });
-        }
-
-        [HttpPut]
-        public IActionResult Update(AccountDto accountDto)
-        {
-            var result = _accountService.Update(accountDto);
-
-            if (result is -1)
-            {
-                return NotFound(new ResponseHandler<AccountDto>
-                {
-                    Code = StatusCodes.Status404NotFound,
-                    Status = HttpStatusCode.NotFound.ToString(),
-                    Message = "Guid is not found"
-                });
-            }
-
-            if (result is 0)
-            {
-                return StatusCode(500, new ResponseHandler<AccountDto>
-                {
-                    Code = StatusCodes.Status500InternalServerError,
-                    Status = HttpStatusCode.OK.ToString(),
-                    Message = "Error retrieve from database"
-                });
-            }
-
-            return Ok(new ResponseHandler<AccountDto>
-            {
-                Code = StatusCodes.Status200OK,
-                Status = HttpStatusCode.OK.ToString(),
-                Message = "Success update data"
-            });
-        }
-
-        [HttpDelete]
-        public IActionResult Delete(Guid guid)
-        {
-            var result = _accountService.Delete(guid);
-
-
-            if (result is -1)
-            {
-                return NotFound(new ResponseHandler<AccountDto>
-                {
-                    Code = StatusCodes.Status404NotFound,
-                    Status = HttpStatusCode.NotFound.ToString(),
-                    Message = "Guid is not found"
-                });
-            }
-
-            if (result is 0)
-            {
-                return StatusCode(500, new ResponseHandler<AccountDto>
-                {
-                    Code = StatusCodes.Status500InternalServerError,
-                    Status = HttpStatusCode.OK.ToString(),
-                    Message = "Error retrieve from database"
-                });
-            }
-
-            return Ok(new ResponseHandler<AccountDto>
-            {
-                Code = StatusCodes.Status200OK,
-                Status = HttpStatusCode.OK.ToString(),
-                Message = "Success delete data"
-            });
-        }
-
-        [HttpPost("login")] //kenapa login pake http post karena ada validasi untuk inputannya
+        [HttpPost("login")]
         public IActionResult Login(LoginDto loginDto)
         {
             var result = _accountService.Login(loginDto);
 
-            if (result is 0)
+            if (result is false)
             {
                 return NotFound(new ResponseHandler<LoginDto>
                 {
@@ -185,54 +48,48 @@ namespace API.Controllers
         public IActionResult Register(RegisterDto registerDto)
         {
             var result = _accountService.Register(registerDto);
-            if (result == 0)
+
+            if (result is 0)
             {
-                return StatusCode(500, new ResponseHandler<RegisterDto>
+                return NotFound(new ResponseHandler<LoginDto>
                 {
-                    Code = StatusCodes.Status500InternalServerError,
-                    Status = HttpStatusCode.InternalServerError.ToString(),
-                    Message = "Email or PhoneNumber is already registered."
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Email or Password is incorrect"
                 });
             }
 
-            if (result == 1)
-            {
-                return Ok(new ResponseHandler<RegisterDto>
-                {
-                    Code = StatusCodes.Status200OK,
-                    Status = HttpStatusCode.OK.ToString(),
-                    Message = "Registration success"
-                });
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHandler<RegisterDto>
+            return Ok(new ResponseHandler<LoginDto>
             {
                 Code = StatusCodes.Status200OK,
                 Status = HttpStatusCode.OK.ToString(),
-                Message = "Error retrive from database"
+                Message = "Register Success"
             });
         }
 
-        [HttpPost("forgotpassword")]
+        [HttpPost("forgot-password")]
         public IActionResult ForgotPassword(ForgotPasswordDto forgotPasswordDto)
         {
-            var isUpdated = _accountService.ForgotPasswordDto(forgotPasswordDto);
-            if (isUpdated == 0)
+            var isUpdated = _accountService.ForgotPassword(forgotPasswordDto);
+            if (isUpdated is 0)
+            {
                 return NotFound(new ResponseHandler<ForgotPasswordDto>
                 {
                     Code = StatusCodes.Status404NotFound,
                     Status = HttpStatusCode.NotFound.ToString(),
-                    Message = "Email not found"
+                    Message = "Email Not Found"
                 });
+            }
 
             if (isUpdated is -1)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHandler<ForgotPasswordDto>
+            {
+                return StatusCode(500, new ResponseHandler<ForgotPasswordDto>
                 {
                     Code = StatusCodes.Status500InternalServerError,
                     Status = HttpStatusCode.InternalServerError.ToString(),
-                    Message = "Error retrieving data from the database"
+                    Message = "Error Retrieve From Database"
                 });
-
+            }
             return Ok(new ResponseHandler<ForgotPasswordDto>
             {
                 Code = StatusCodes.Status200OK,
@@ -241,22 +98,21 @@ namespace API.Controllers
             });
         }
 
-
         [HttpPost("changepassword")]
         public IActionResult UpdatePassword(ChangePasswordDto changePasswordDto)
         {
             var update = _accountService.ChangePassword(changePasswordDto);
-            if (update == 0)
+            if (update is 0)
             {
                 return NotFound(new ResponseHandler<ChangePasswordDto>
                 {
                     Code = StatusCodes.Status404NotFound,
                     Status = HttpStatusCode.NotFound.ToString(),
-                    Message = "Email not found"
+                    Message = "Email Not Found"
                 });
             }
 
-            if (update == -1)
+            if (update is -1)
             {
                 return NotFound(new ResponseHandler<ChangePasswordDto>
                 {
@@ -266,7 +122,7 @@ namespace API.Controllers
                 });
             }
 
-            if (update == -2)
+            if (update is -2)
             {
                 return NotFound(new ResponseHandler<ChangePasswordDto>
                 {
@@ -276,13 +132,23 @@ namespace API.Controllers
                 });
             }
 
-            if (update == -3)
+            if (update is -3)
             {
                 return NotFound(new ResponseHandler<ChangePasswordDto>
                 {
                     Code = StatusCodes.Status404NotFound,
                     Status = HttpStatusCode.NotFound.ToString(),
-                    Message = "Otp Already Expired"
+                    Message = "OTP already expired"
+                });
+            }
+
+            if (update == -4)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseHandler<ChangePasswordDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.InternalServerError.ToString(),
+                    Message = "Error retrieving data from the database"
                 });
             }
 
@@ -290,7 +156,142 @@ namespace API.Controllers
             {
                 Code = StatusCodes.Status200OK,
                 Status = HttpStatusCode.OK.ToString(),
-                Message = "Succesfuly Updated"
+                Message = "Password Updated Success"
+            });
+        }
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var result = _accountService.GetAll();
+            if (!result.Any())
+            {
+                return NotFound(new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Data Not Found"
+                });
+            }
+
+            return Ok(new ResponseHandler<IEnumerable<AccountDto>>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success Retrieve Data",
+                Data = result
+            });
+        }
+
+        [HttpGet("{guid}")]
+        public IActionResult GetByGuid(Guid guid)
+        {
+            var result = _accountService.GetByGuid(guid);
+            if (result is null)
+            {
+                return NotFound(new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid is Not Found"
+                });
+            }
+
+            return Ok(new ResponseHandler<AccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success Retrieve Data",
+                Data = result
+            });
+        }
+
+        [HttpPost]
+        public IActionResult Insert(NewAccountDto newAccountDto)
+        {
+            var result = _accountService.Create(newAccountDto);
+            if (result is null)
+            {
+                return StatusCode(500, new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.InternalServerError.ToString(),
+                    Message = "Error Retrieve From Database"
+                });
+            }
+
+            return Ok(new ResponseHandler<NewAccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Insert Data Success",
+                Data = newAccountDto
+            });
+        }
+
+        [HttpPut]
+        public IActionResult Update(AccountDto AccountDto)
+        {
+            var result = _accountService.Update(AccountDto);
+
+            if (result is -1)
+            {
+                return NotFound(new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Data Not Found"
+                });
+            }
+
+            if (result is 0)
+            {
+                return StatusCode(500, new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.InternalServerError.ToString(),
+                    Message = "Error Retrieve From Database"
+                });
+            }
+
+            return Ok(new ResponseHandler<AccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Update Data Success"
+            });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(Guid guid)
+        {
+            var result = _accountService.Delete(guid);
+
+            if (result is -1)
+            {
+                return NotFound(new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Guid Not Found"
+                });
+            }
+
+            if (result is 0)
+            {
+                return StatusCode(500, new ResponseHandler<AccountDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.InternalServerError.ToString(),
+                    Message = "Error Retrieve From Database"
+                });
+            }
+
+            return Ok(new ResponseHandler<AccountDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Delete Data Success"
             });
         }
     }

@@ -1,15 +1,14 @@
 ﻿using API.Models;
+using API.Utilities.Enums;
 
 namespace API.Contracts
 {
     public interface IEmployeeRepository : IGeneralRepository<Employee>
     {
-        //IEnumerable<Employee> GetByName(string name);
-        bool isNotExist(string value);
-        string GetAutoNik();
+        bool IsNotExist(string value);
+        string GetLastNik();
         Employee? GetByEmail(string email);
-        Employee? CheckEmail(string email);
         Guid GetLastEmployeeGuid();
-        //bool isSameGuid(Guid guid);
+        Employee? CheckEmail(string email);
     }
 }

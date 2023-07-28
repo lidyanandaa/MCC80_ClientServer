@@ -1,26 +1,31 @@
 ﻿using API.Contracts;
-using API.DTOs.Accounts;
+using API.DTOs.AccountDto;
 using FluentValidation;
 
-namespace API.Utilities.Validations.Accounts
+namespace API.Utilities.Validation.Accounts
 {
     public class ChangePasswordValidator : AbstractValidator<ChangePasswordDto>
     {
         private readonly IEmployeeRepository _employeeRepository;
+
         public ChangePasswordValidator(IEmployeeRepository employeeRepository)
         {
             _employeeRepository = employeeRepository;
 
-            RuleFor(register => register.Email).NotEmpty().EmailAddress().WithMessage("Email is required");
+            RuleFor(e => e.Email)
+                .NotEmpty()
+                .EmailAddress()
+                .WithMessage("Email is required");
+            RuleFor(Accounts => Accounts.OTP)
+                .NotEmpty()
+                .WithMessage("OTP is Required");
+            RuleFor(Accounts => Accounts.Password)
+                .NotEmpty()
+                .WithMessage("Password is required")
+                .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$");
+            RuleFor(Accounts => Accounts.NewPassword)
+                .NotEmpty().Equal(Accounts => Accounts.Password);
 
-            RuleFor(Account => Account.OTP).NotEmpty().WithMessage("OTP is required");
-
-            RuleFor(Account => Account.NewPassword).NotEmpty().WithMessage("Password is required")
-                .Matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z\\d]).{8,}$");
-
-            RuleFor(Account => Account.ConfirmPassword)
-                .Equal(register => register.NewPassword).WithMessage("Password Correct")
-                .WithMessage("Passwords do not match");
         }
     }
 }

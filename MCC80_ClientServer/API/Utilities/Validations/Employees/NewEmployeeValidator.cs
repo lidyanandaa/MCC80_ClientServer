@@ -49,7 +49,7 @@ namespace API.Utilities.Validation.Employees
         //agar data tidak ada yg duplikasi, untuk email dan password
         private bool IsDuplicationValue(string arg)
         {
-            return _employeeRepository.isNotExist(arg);
+            return _employeeRepository.IsNotExist(arg);
         }
     }
 }

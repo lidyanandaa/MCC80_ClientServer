@@ -1,76 +1,60 @@
 ﻿using API.Contracts;
-using API.DTOs.Accounts;
+using API.DTOs.AccountDto;
 using FluentValidation;
 
-namespace API.Utilities.Validations.Accounts
+namespace API.Utilities.Validation.Accounts
 {
-    public class RegisterValidator : AbstractValidator<RegisterDto> //buat class RegisterValidator yang mewarisi AbstractValidator dari entity RegisterDto
+    public class RegisterValidator : AbstractValidator<RegisterDto>
     {
         private readonly IEmployeeRepository _employeeRepository;
-        private readonly IEducationRepository _educationRepository;
-        private readonly IUniversityRepository _universityRepository;
-        public RegisterValidator(IEmployeeRepository employeeRepository, IEducationRepository educationRepository, IUniversityRepository universityRepository)
+
+        public RegisterValidator(IEmployeeRepository employeeRepository)
         {
             _employeeRepository = employeeRepository;
-            _educationRepository = educationRepository;
-            _universityRepository = universityRepository;
 
-            // rule for employee
-            RuleFor(e => e.FirstName)
+            RuleFor(l => l.FirstName)
                 .NotEmpty();
-
-            RuleFor(e => e.LastName)
-                .NotEmpty();
-
-            RuleFor(e => e.BirthDate)
+            RuleFor(l => l.BirthDate)
                 .NotEmpty()
                 .LessThanOrEqualTo(DateTime.Now.AddYears(-10));
-
-            RuleFor(e => e.Gender)
-                .NotNull().IsInEnum();
-
-            RuleFor(e => e.HiringDate)
+            RuleFor(l => l.Gender)
+                .NotNull()
+                .IsInEnum();
+            RuleFor(l => l.HiringDate)
                 .NotEmpty();
-
-            RuleFor(e => e.Email)
+            RuleFor(l => l.Email)
                 .NotEmpty().WithMessage("Email is required")
                 .EmailAddress().WithMessage("Email is not valid")
-                .Must(IsDuplicateValue).WithMessage("Email already exists");
-
-            RuleFor(e => e.PhoneNumber)
+                .Must(IsDuplicateValue).WithMessage("Email already exists"); 
+            RuleFor(l => l.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(20)
-                .Matches(@"(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$").WithMessage("Password not valid")
+                .Matches(@"^\+[0-9]")
                 .Must(IsDuplicateValue).WithMessage("Phone Number already exists");
-
-            // rule for university
-            RuleFor(u => u.UniversityName)
-                .NotEmpty().WithMessage("University name is required");
-
-            RuleFor(u => u.UniversityCode)
-                .NotEmpty().WithMessage("University code is required"); ;
-
-            // rule for education 
-            RuleFor(e => e.Major)
-                .NotEmpty().WithMessage("Major is required"); ;
-
-            RuleFor(e => e.Degree)
-                .NotEmpty().WithMessage("Degree is required"); ;
-
-            RuleFor(e => e.Gpa)
-                .NotEmpty().WithMessage("GPA is required"); ;
-
-            // rule for account
-            RuleFor(a => a.Password).NotEmpty().WithMessage("Password is required");
-
-            RuleFor(a => a.ConfirmPassword).NotEmpty().Equal(a => a.ConfirmPassword).WithMessage("Password don't match");
-
-            //RuleFor(a => a.OTP).NotEmpty();
+            RuleFor(l => l.Major)
+                .NotEmpty();
+            RuleFor(l => l.Degree)
+                .NotEmpty();
+            RuleFor(l => l.GPA)
+                .LessThanOrEqualTo(4)
+                .GreaterThanOrEqualTo(0)
+                .NotEmpty();
+            RuleFor(l => l.UniversityCode)
+                .NotEmpty();
+            RuleFor(l => l.UniversityName)
+                .NotEmpty();
+            RuleFor(l => l.Password)
+                .NotEmpty().WithMessage("Password is required")
+                .Matches(@"(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$").WithMessage("Password not valid");
+            RuleFor(l => l.ConfirmPassword)
+                .NotEmpty()
+                .Equal(l => l.Password)
+                .WithMessage("Password do not match");
         }
 
         private bool IsDuplicateValue(string value)
         {
-            return _employeeRepository.isNotExist(value);
+            return _employeeRepository.IsNotExist(value);
         }
     }
 }

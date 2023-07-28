@@ -1,10 +1,10 @@
 ﻿using API.Contracts;
 using API.Data;
+using API.DTOs.AccountDto;
 using API.DTOs.Accounts;
 using API.Models;
 using API.Repositories;
 using API.Utilities.Handlers;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
@@ -14,114 +14,46 @@ namespace API.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IEducationRepository _educationRepository;
         private readonly IUniversityRepository _universityRepository;
-        private readonly BookingDbContext _dBContext;
+        private readonly BookingDbContext _dbContext;
 
-        public AccountService(IAccountRepository accountRepository, IEmployeeRepository employeeRepository, IUniversityRepository universityRepository, IEducationRepository educationRepository, BookingDbContext dbContext)
+        public AccountService(IAccountRepository accountRepository, IEmployeeRepository employeeRepository, IEducationRepository educationRepository, IUniversityRepository universityRepository, BookingDbContext dbContext)
         {
             _accountRepository = accountRepository;
             _employeeRepository = employeeRepository;
             _educationRepository = educationRepository;
             _universityRepository = universityRepository;
-            _dBContext = dbContext;
+            _dbContext = dbContext;
         }
 
-        public IEnumerable<AccountDto> GetAll()
-        {
-            var accounts = _accountRepository.GetAll();
-            if (!accounts.Any())
-            {
-                return Enumerable.Empty<AccountDto>(); // account is null or not found;
-            }
-
-            var accountDtos = new List<AccountDto>();
-            foreach (var account in accounts)
-            {
-                accountDtos.Add((AccountDto)account);
-            }
-
-            return accountDtos; // account is found;
-        }
-
-        public AccountDto? GetByGuid(Guid guid)
-        {
-            var account = _accountRepository.GetByGuid(guid);
-            if (account is null)
-            {
-                return null; // account is null or not found;
-            }
-
-            return (AccountDto)account; // account is found;
-        }
-
-        public AccountDto? Create(NewAccountDto newAccountDto)
-        {
-            var account = _accountRepository.Create(newAccountDto);
-            if (account is null)
-            {
-                return null; // account is null or not found;
-            }
-
-            return (AccountDto)account; // account is found;
-        }
-
-        public int Update(AccountDto accountDto)
-        {
-            var account = _accountRepository.GetByGuid(accountDto.Guid);
-            if (account is null)
-            {
-                return -1; // account is null or not found;
-            }
-
-            Account toUpdate = accountDto;
-            toUpdate.CreatedDate = account.CreatedDate;
-            var result = _accountRepository.Update(toUpdate);
-
-            return result ? 1 // account is updated;
-                : 0; // account failed to update;
-        }
-
-        public int Delete(Guid guid)
-        {
-            var account = _accountRepository.GetByGuid(guid);
-            if (account is null)
-            {
-                return -1; // account is null or not found;
-            }
-
-            var result = _accountRepository.Delete(account);
-
-            return result ? 1 // account is deleted;
-                : 0; // account failed to delete;
-        }
-
-        public int Login(LoginDto loginDto)
+        public bool Login(LoginDto loginDto)
         {
             var getEmployee = _employeeRepository.GetByEmail(loginDto.Email);
 
             if (getEmployee is null)
             {
-                return 0; // Employee not found
+                return false; // Employee not found
             }
 
             var getAccount = _accountRepository.GetByGuid(getEmployee.Guid);
 
-            if (getAccount.Password == loginDto.Password)
+            if (getEmployee != null && HashingHandler.ValidateHash(loginDto.Password, getAccount.Password))
             {
-                return 1; // Login success
+                return true; // Login success
             }
 
-            return 0;
+            return false;
         }
+
         public int Register(RegisterDto registerDto)
         {
             // ini untuk cek emaik sama phone number udah ada atau belum
-            if (!_employeeRepository.isNotExist(registerDto.Email) ||
-                !_employeeRepository.isNotExist(registerDto.PhoneNumber))
+            if (!_employeeRepository.IsNotExist(registerDto.Email) ||
+                !_employeeRepository.IsNotExist(registerDto.PhoneNumber))
             {
                 return 0; // kalau sudah ada, pendaftaran gagal.
             }
 
-            using var transaction = _dBContext.Database.BeginTransaction();
+            using var transaction = _dbContext.Database.BeginTransaction();
             try
             {
                 var university = _universityRepository.GetByCode(registerDto.UniversityCode);
@@ -137,9 +69,7 @@ namespace API.Services
                     university = createUniversity;
                 }
 
-                var newNik =
-                    GenerateHandler.Nik(_employeeRepository
-                                           .GetAutoNik()); //karena niknya generate, sebelumnya kalo ga dikasih ini niknya null jadi error
+                var newNik = GenerateHandler.Nik(_employeeRepository.GetLastNik()); //karena niknya generate, sebelumnya kalo ga dikasih ini niknya null jadi error
                 var employeeGuid = Guid.NewGuid(); // Generate GUID baru untuk employee
 
                 // Buat objek Employee dengan nilai GUID baru
@@ -162,16 +92,18 @@ namespace API.Services
                     Guid = employeeGuid, // Gunakan employeeGuid
                     Major = registerDto.Major,
                     Degree = registerDto.Degree,
-                    Gpa = registerDto.Gpa,
+                    Gpa = registerDto.GPA,
                     UniversityGuid = university.Guid
                 });
+
+                var hashedPassword = HashingHandler.GenerateHash(registerDto.Password);
 
                 var account = _accountRepository.Create(new Account
                 {
                     Guid = employeeGuid, // Gunakan employeeGuid
                     Otp = 1,             //sementara ini dicoba gabisa diisi angka nol didepan, tadi masukin 098 error
                     IsUsed = true,
-                    Password = registerDto.Password
+                    Password = hashedPassword
                 });
                 transaction.Commit();
                 return 1;
@@ -183,36 +115,38 @@ namespace API.Services
             }
         }
 
-        public int ForgotPasswordDto(ForgotPasswordDto forgotPasswordDto)
+        public int ForgotPassword(ForgotPasswordDto forgotPasswordDto)
         {
+            var otp = new Random().Next(111111, 999999);
             var getAccountDetail = (from e in _employeeRepository.GetAll()
                                     join a in _accountRepository.GetAll() on e.Guid equals a.Guid
                                     where e.Email == forgotPasswordDto.Email
                                     select a).FirstOrDefault();
-            _accountRepository.Clear();
 
             if (getAccountDetail is null)
             {
-                return 0;
+                return 0; // no email found
             }
 
-            var otp = new Random().Next(111111, 999999);
-            var account = new Account
+            _accountRepository.Clear();
+
+            var hashedPassword = HashingHandler.GenerateHash(getAccountDetail.Password);
+            var isUpdated = _accountRepository.Update(new Account
             {
                 Guid = getAccountDetail.Guid,
-                Password = getAccountDetail.Password,
+                Password = hashedPassword,
                 ExpiredTime = DateTime.Now.AddMinutes(5),
                 Otp = otp,
                 IsUsed = false,
                 CreatedDate = getAccountDetail.CreatedDate,
-                ModifiedDate = DateTime.Now
-            };
+                ModifiedDate = getAccountDetail.ModifiedDate
+            });
 
-            var isUpdated = _accountRepository.Update(account);
             if (!isUpdated)
             {
-                return -1;
+                return -1; // error update
             }
+
             return 1;
         }
 
@@ -225,10 +159,8 @@ namespace API.Services
 
             if (getAccount is null)
             {
-                return 0; //Account not found
+                return 0;
             }
-
-            //var getAccount = _accountRepository.GetByGuid(isExist.Guid);
             var account = new Account
             {
                 Guid = getAccount.Guid,
@@ -237,8 +169,9 @@ namespace API.Services
                 CreatedDate = getAccount.CreatedDate,
                 Otp = getAccount.Otp,
                 ExpiredTime = getAccount.ExpiredTime,
-                Password = changePasswordDto.NewPassword
+                Password = HashingHandler.GenerateHash(changePasswordDto.Password),
             };
+
             if (getAccount.Otp != changePasswordDto.OTP)
             {
                 return -1;
@@ -251,15 +184,87 @@ namespace API.Services
 
             if (getAccount.ExpiredTime < DateTime.Now)
             {
-                return -3;
+                return -3; // OTP expired
             }
+
+            _accountRepository.Clear();
 
             var isUpdated = _accountRepository.Update(account);
             if (!isUpdated)
             {
-                return -4; //Account Not Update
+                return -4; //Account not Update
             }
-            return 1; // Oke
+
+            return 3;
+        }
+
+        public IEnumerable<AccountDto> GetAll()
+        {
+            var accounts = _accountRepository.GetAll();
+            if (!accounts.Any())
+            {
+                return Enumerable.Empty<AccountDto>(); // Account is null or not found;
+            }
+
+            var accountDtos = new List<AccountDto>();
+            foreach (var account in accounts)
+            {
+                accountDtos.Add((AccountDto)account);
+            }
+
+            return accountDtos; // Account is found;
+        }
+
+        public AccountDto? GetByGuid(Guid guid)
+        {
+            var account = _accountRepository.GetByGuid(guid);
+            if (account is null)
+            {
+                return null; // Account is null or not found;
+            }
+
+            return (AccountDto)account; // Account is found;
+        }
+
+        public AccountDto? Create(NewAccountDto newAccountDto)
+        {
+            var account = _accountRepository.Create(newAccountDto);
+            if (account is null)
+            {
+                return null; // Account is null or not found;
+            }
+
+            return (AccountDto)account; // Account is found;
+        }
+
+        public int Update(AccountDto accountDto)
+        {
+            var account = _accountRepository.GetByGuid(accountDto.Guid);
+            if (account is null)
+            {
+                return -1; // Account is null or not found;
+            }
+
+            Account toUpdate = accountDto;
+            toUpdate.CreatedDate = account.CreatedDate;
+            var result = _accountRepository.Update(toUpdate);
+
+            return result ? 1 // Account is updated;
+                : 0; // Account failed to update;
+        }
+
+        public int Delete(Guid guid)
+        {
+            var account = _accountRepository.GetByGuid(guid);
+            if (account is null)
+            {
+                return -1; // Account is null or not found;
+            }
+
+            var result = _accountRepository.Delete(account);
+
+            return result ? 1 // Account is deleted;
+                : 0; // Account failed to delete;
         }
     }
 }

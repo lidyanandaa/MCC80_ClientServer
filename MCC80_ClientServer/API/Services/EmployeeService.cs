@@ -50,7 +50,7 @@ namespace API.Services
         public EmployeeDto? Create(NewEmployeeDto newEmployeeDto)
         {
             Employee toCreate = newEmployeeDto;
-            toCreate.Nik = GenerateHandler.Nik(_employeeRepository.GetAutoNik());
+            toCreate.Nik = GenerateHandler.Nik(_employeeRepository.GetLastNik());
 
             var employee = _employeeRepository.Create(toCreate);
             if (employee is null)

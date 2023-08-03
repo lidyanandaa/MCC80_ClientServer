@@ -1,4 +1,5 @@
-﻿using API.Models;
+﻿using API.DTOs.Roles;
+using API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
@@ -16,9 +17,18 @@ namespace API.Data
         public DbSet<Room> Rooms { get; set; }
         public DbSet<University> Universities { get; set; }
 
-        //menambahkan uniq 
+        //menambahkan uniq table 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // untuk mencegah duplikasi data
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Role>().HasData(new NewRoleDefaultDto
+            {
+                Guid = Guid.Parse("4887ec13-b482-47b3-9b24-08db91a71770"),
+                Name = "Employee"
+            });
+
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Employee>()
                         .HasIndex(e => new
@@ -33,13 +43,14 @@ namespace API.Data
                         .HasOne(e => e.University)
                         .WithMany(u => u.Educations)
                         .HasForeignKey(u => u.UniversityGuid);*/
+
             //Cardinality
             // University with many education (1:N) / ICollection
             modelBuilder.Entity<University>()
                         .HasMany(u => u.Educations)
                         .WithOne(e => e.University)
                         .HasForeignKey(e => e.UniversityGuid);
-                        //.OnDelete(DeleteBehavior.Restrict); //untuk melkaukan hapus
+                        //.OnDelete(DeleteBehavior.Restrict); //untuk melkaukan hapus untuk memastikan daat referensinya tidak bisa dihapus jika memiliki relasi FK
 
             //Many booking with one room (N:1)
             modelBuilder.Entity<Booking>()
@@ -57,13 +68,13 @@ namespace API.Data
             modelBuilder.Entity<Education>()
                         .HasOne(em => em.Employee)
                         .WithOne(ed => ed.Education)
-                        .HasForeignKey<Education>(ed => ed.Guid);
+                        .HasForeignKey<Education>(ed => ed.Guid); //dilihat FK nya ada ditabel mana
 
             //One Employee with one accounts (1:1)
             modelBuilder.Entity<Employee>()
                         .HasOne(a => a.Account)
                         .WithOne(e => e.Employee)
-                        .HasForeignKey<Account>(a => a.Guid);
+                        .HasForeignKey<Account>(a => a.Guid); //dilihat FK nya ada ditabel mana
 
             //Many accountrole with one role(N:1)
             modelBuilder.Entity<AccountRole>()

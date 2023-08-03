@@ -4,6 +4,7 @@ using API.DTOs.Accounts;
 using API.Models;
 using API.Services;
 using API.Utilities.Handlers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -11,7 +12,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
-
+    [Authorize]
     public class AccountController : ControllerBase
     {
         private readonly AccountService _accountService;
@@ -21,10 +22,11 @@ namespace API.Controllers
             _accountService = accountService;
         }
 
+        [AllowAnonymous] //pengecualian dari authorize
         [HttpPost("login")]
         public IActionResult Login(LoginDto loginDto)
         {
-            var result = _accountService.Login(loginDto);
+            /*var result = _accountService.Login(loginDto);
 
             if (result is false)
             {
@@ -41,9 +43,42 @@ namespace API.Controllers
                 Code = StatusCodes.Status200OK,
                 Status = HttpStatusCode.OK.ToString(),
                 Message = "Login Success"
+            });*/
+
+            var result = _accountService.Login(loginDto);
+
+            if (result is "-1")
+            {
+                return NotFound(new ResponseHandler<LoginDto>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Message = "Email or Password is incorrect"
+                });
+            }
+
+            if (result is "-2")
+            {
+                return StatusCode(500, new ResponseHandler<ForgotPasswordDto>
+                {
+                    Code = StatusCodes.Status500InternalServerError,
+                    Status = HttpStatusCode.InternalServerError.ToString(),
+                    Message = "Error when generate token"
+                });
+            }
+                return Ok(new ResponseHandler<TokenDto>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Login Success",
+                Data = new TokenDto
+                {
+                    Token = result
+                }
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register(RegisterDto registerDto)
         {

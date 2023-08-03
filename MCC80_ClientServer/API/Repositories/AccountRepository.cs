@@ -7,7 +7,7 @@ namespace API.Repositories
 {
     public class AccountRepository : GeneralRepository<Account>, IAccountRepository
     {
-        public AccountRepository    (BookingDbContext context) : base(context)
+        public AccountRepository(BookingDbContext context) : base(context)
         {
 
         }

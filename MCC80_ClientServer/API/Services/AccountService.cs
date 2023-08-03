@@ -1,10 +1,12 @@
 ﻿using API.Contracts;
 using API.Data;
 using API.DTOs.AccountDto;
+using API.DTOs.AccountRoles;
 using API.DTOs.Accounts;
 using API.Models;
 using API.Repositories;
 using API.Utilities.Handlers;
+using System.Security.Claims;
 
 namespace API.Services
 {
@@ -14,10 +16,12 @@ namespace API.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IEducationRepository _educationRepository;
         private readonly IUniversityRepository _universityRepository;
-        private readonly BookingDbContext _dbContext;
+        private readonly IAccountRoleRepository _accountRoleRepository;
+        private readonly ITokenHandler _tokenHandler;
         private readonly IEmailHandler _emailHandler;
+        private readonly BookingDbContext _dbContext;
 
-        public AccountService(IAccountRepository accountRepository, IEmployeeRepository employeeRepository, IEducationRepository educationRepository, IUniversityRepository universityRepository, BookingDbContext dbContext , IEmailHandler emailHandler)
+        public AccountService(IAccountRepository accountRepository, IEmployeeRepository employeeRepository, IEducationRepository educationRepository, IUniversityRepository universityRepository, BookingDbContext dbContext, IEmailHandler emailHandler, ITokenHandler tokenHandler, IAccountRoleRepository accountRoleRepository)
         {
             _accountRepository = accountRepository;
             _employeeRepository = employeeRepository;
@@ -25,25 +29,63 @@ namespace API.Services
             _universityRepository = universityRepository;
             _dbContext = dbContext;
             _emailHandler = emailHandler;
+            _tokenHandler = tokenHandler;
+            _accountRoleRepository = accountRoleRepository;
         }
 
-        public bool Login(LoginDto loginDto)
+        public string Login(LoginDto loginDto)
         {
             var getEmployee = _employeeRepository.GetByEmail(loginDto.Email);
 
             if (getEmployee is null)
             {
-                return false; // Employee not found
+                return "-1"; // Employee not found
             }
 
             var getAccount = _accountRepository.GetByGuid(getEmployee.Guid);
 
-            if (getEmployee != null && HashingHandler.ValidateHash(loginDto.Password, getAccount.Password))
+            if (!HashingHandler.ValidateHash(loginDto.Password, getAccount.Password))
             {
-                return true; // Login success
+                return "-1"; // Login gagal
             }
 
-            return false;
+            var employee = _employeeRepository.GetByEmail(loginDto.Email);
+            var getRoles = _accountRoleRepository.GetRoleNamesByAccountGuid(employee.Guid);
+
+            //logika kak hanif
+            /* var employeeAccount = from e in _employeeRepository.GetAll()
+                                   join a in _accountRepository.GetAll() on e.Guid equals a.Guid
+                                   where e.Email == loginDto.Email && HashingHandler.ValidateHash(loginDto.Password, a.Password)
+                                   select new LoginDto()
+                                   {
+                                       Email = e.Email,
+                                       Password = a.Password
+                                   };
+
+             if (!employeeAccount.Any())
+             {
+                 return "-1";
+             }*/
+
+            var claims = new List<Claim>
+            {
+                new Claim("Guid",getEmployee.Guid.ToString()),
+                new Claim("FullName", $"{getEmployee.FirstName} {getEmployee.LastName}"),
+                new Claim("Email", getEmployee.Email)
+            };
+
+            foreach (var role in getRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var generatedToken = _tokenHandler.GenerateToken(claims);
+            if (generatedToken is null)
+            {
+                return "-2";
+            }
+
+            return generatedToken;
         }
 
         public int Register(RegisterDto registerDto)
@@ -107,6 +149,13 @@ namespace API.Services
                     IsUsed = true,
                     Password = hashedPassword
                 });
+
+                var accountRole = _accountRoleRepository.Create(new NewAccountRoleDto
+                {
+                    AccountGuid = account.Guid,
+                    RoleGuid = Guid.Parse("4887ec13-b482-47b3-9b24-08db91a71770")
+                });
+
                 transaction.Commit();
                 return 1;
             }

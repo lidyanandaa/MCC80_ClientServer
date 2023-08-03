@@ -11,7 +11,8 @@ namespace API.Repositories
 
         public University? GetByCode(string code)
         {
-            return _context.Set<University>().SingleOrDefault(u => u.Code == code);
+            return _context.Set<University>()
+                           .SingleOrDefault(u => u.Code == code);
         }
         public IEnumerable<University> GetByName(string name)
         {

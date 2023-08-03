@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace API.Repositories
 {
     public class GeneralRepository<TEntity> : IGeneralRepository<TEntity>
-    where TEntity : class
+    where TEntity : class // untuk mengaskan bahwa entity adalha sebuah class
     {
         protected readonly BookingDbContext _context;
 

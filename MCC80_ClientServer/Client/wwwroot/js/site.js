@@ -392,7 +392,6 @@ $(document).ready(function () {
             dataSrc: "data",
             dataType: "JSON"
         },
-
         columns: [
             /*{ data: "guid" },*/
             {
@@ -431,10 +430,14 @@ $(document).ready(function () {
             {
                 data: '',
                 render: function (data, type, row) {
-                    return `<button onclick="editEmployee('${row.url}')" data-bs-toggle="modal" data-bs-target="" class="btn btn-warning"><i class="fas fa-edit"></i> </button>
-                    <button onclick="editEmployee('${row.url}')" data-bs-toggle="modal" data-bs-target="" class="btn btn-danger"><i class="fas fa-trash"></i> </button>`;
+                    return `<button onclick="Update('${row.url}')" data-bs-toggle="modal" data-bs-target="" class="btn btn-warning"><i class="fas fa-edit"></i> </button>
+                    <button onclick="Delete('${row.url}')" data-bs-toggle="modal" data-bs-target="" class="btn btn-danger"><i class="fas fa-trash"></i> </button>`;
                 }
             }
+        ],
+        dom: 'Blfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
         ]
     });
 });
@@ -466,26 +469,196 @@ function Insert() {
 })
 }
 
-//function Insert() {
-//    var obj = new Object();
-//    obj.First_Name = $("#firstName").val();
-//    obj.Last_Name = $("#lastName").val();
-//    obj.Birth_Date = $("#birthDate").val();
-//    obj.Gender = $("#gender").val() === "female" ? 0 : 1;
-//    obj.Hiring_Date = $("#hiringDate").val();
-//    obj.Email = $("#email").val();
-//    obj.Phone_Number = $("#phone").val();
+$(document).ready(function () {
+    // Fetch data from API
+    $.ajax({
+        url: "https://localhost:7260/api/employees",
+    }).done(function (result) {
+        let female = 0;
+        let male = 0;
 
+        result.data.forEach(function (dataDetail) {
+            if (dataDetail.gender === 0) {
+                female++;
+            } else if (dataDetail.gender === 1) {
+                male++;
+            }
+        });
+
+        console.log("Total Female", female)
+        console.log("Total Male", male)
+
+        // Buat data baru untuk grafik pie berdasarkan data gender yang dihitung
+        var genderPieData = {
+            labels: ['Female', 'Male'],
+            datasets: [
+                {
+                    data: [female, male],
+                    backgroundColor: ['red', 'blue'],
+                }
+            ]
+        };
+
+        // Buat grafik pie
+        new Chart(('genderPieChart'), {
+            type: 'pie',
+            data: genderPieData
+        });
+    });
+});
+
+$(document).ready(function () {
+    // Fetch data from API
+    $.ajax({
+        url: "https://localhost:7260/api/univerities",
+    }).done(function (result) {
+        let Undika = 0;
+        let Stikom = 0;
+        let UI = 0;
+        let Unsri = 0;
+        let UPN = 0;
+        let ITS = 0;
+        let Others = 0;
+
+        result.data.forEach(function (dataDetail) {
+            if (dataDetail.code === 'Undika') {
+                Undika++;
+            } else if (dataDetail.code === 'Stikom') {
+                Stikom++;
+            } else if (dataDetail.code === 'UI') {
+                UI++;
+            } else if (dataDetail.code === 'Unsri') {
+                Unsri++;
+            } else if (dataDetail.code === 'UPN') {
+                UPN++;
+            } else if (dataDetail.code === 'ITS') {
+                ITS++;
+            }
+        });
+
+        console.log("Total Undika", Undika)
+        console.log("Total Stikom", Stikom)
+        console.log("Total UI", UI)
+        console.log("Total Unsri", Unsri)
+        console.log("Total UPN", UPN)
+        console.log("Total ITS", ITS)
+
+        // Buat data baru untuk grafik bar berdasarkan data gender yang dihitung
+        var countUnivData = {
+            labels: ['Undika', 'Stikom', 'UI', 'Unsri', 'UPN','ITS'],
+            datasets: [
+                {
+                    data: [Undika, Stikom, UI, Unsri, UPN, ITS],
+                    backgroundColor: ['red', 'blue', 'yellow', 'green', 'pink','orange'],
+                }
+            ]
+        };
+
+        // Buat grafik pie
+        new Chart(('countUnivBar'), {
+            type: 'bar',
+            data: countUnivData
+        });
+    });
+});
+
+//$(document).ready(function () {
+//    // Fetch data from API
 //    $.ajax({
-//        url: "https://localhost:7280/api/employees",
-//        type: "POST",
-//        data: JSON.stringify(obj),
-//        contentType: "application/json",
-//    }).done((result) => {
-//        console.log(result);
-//        alert("Data inserted successfully!");
-//    }).fail((xhr, status, error) => {
-//        console.log(xhr);
-//        alert("Failed to insert data. Error: " + xhr.responseText);
-//    });
-//}
+//        url: "https://localhost:7260/api/univerities",
+//    }).done(function (result) {
+//        let age10 = 0;
+//        let age20 = 0;
+
+//        const currentDate = new Date();
+//        result.data.forEach(function (dataDetail) {
+//            const birthDate = new Date(dataDetail.birthDate);
+//            const age = currentDate.getFullYear() - birthDate.getFullYear();
+
+//            if (age >= 10 && age >= 20) {
+//                age10++;
+//            } else {
+//                age20++;
+//            }
+//        });
+
+//        // Buat data baru untuk grafik pie berdasarkan data gender yang dihitung
+//        var ageData = {
+//            labels: ['10Tahun', '20Tahun'],
+//            datasets: [
+//                {
+//                    data: [age10, age20],
+//                    backgroundColor: ['red', 'blue'],
+//                }
+//            ]
+//        };
+
+//        // Buat grafik pie
+//        new Chart(('countAgeBar'), {
+//            type: 'bar',
+//            data: ageData
+//        });
+//    });
+//});
+
+$(document).ready(function ageChart() {
+    // Memuat data menggunakan Ajax
+    $.ajax({
+        url: "https://localhost:7260/api/employees/"
+    }).done((result) => {
+        // Process the fetched employee data here
+
+        const currentDate = new Date(); // Current date
+        const ageCounts = {};
+
+        result.data.forEach(employee => {
+            const birthDate = new Date(employee.birthDate);
+            const age = currentDate.getFullYear() - birthDate.getFullYear();
+
+            // Counting the occurrences of each age
+            if (ageCounts[age]) {
+                ageCounts[age]++;
+            } else {
+                ageCounts[age] = 1;
+            }
+        });
+
+        var xValues = Object.keys(ageCounts); // Get unique ages
+        var yValues = Object.values(ageCounts); // Get counts for each age
+        var barColors = ["#b91d47", "#00a5a2", "#f36f6f", "#007acc", "#ffa600"]; // Array of different colors
+
+
+        new Chart("countAgeBar", {
+            type: "bar",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    backgroundColor: barColors,
+                    data: yValues
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Employee Age Distribution"
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Age"
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: "Count"
+                        }
+                    }
+                }
+            }
+        });
+    }).fail((xhr, status, error) => {
+        console.error("Error fetching employee data:", error);
+    });
+});

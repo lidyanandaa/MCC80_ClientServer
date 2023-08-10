@@ -190,3 +190,21 @@ th {
 h2 {
     text-align:center;
 }
+
+/*.wrapper .main-header {
+    position: fixed;
+    width: 100%;
+}
+*/
+
+.dt-buttons{
+    margin-bottom:20px
+}
+
+h2 {
+    text-transform: capitalize;
+    text-shadow: 2px 2px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 30px;
+}

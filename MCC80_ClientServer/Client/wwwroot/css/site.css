@@ -1,0 +1,210 @@
+﻿html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    /*background-image: url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5bbf58a6-1e85-4cfe-83fd-02df6f482b45/de8nlib-6bed7b3d-3d7e-4763-bb60-18f5ee0127fd.png/v1/fill/w_1024,h_652,q_80,strp/background_prairie_pokemon_screencapture_by_nemotrex_de8nlib-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NjUyIiwicGF0aCI6IlwvZlwvNWJiZjU4YTYtMWU4NS00Y2ZlLTgzZmQtMDJkZjZmNDgyYjQ1XC9kZThubGliLTZiZWQ3YjNkLTNkN2UtNDc2My1iYjYwLTE4ZjVlZTAxMjdmZC5wbmciLCJ3aWR0aCI6Ijw9MTAyNCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.ZVgNGi61AOkC068E-wphWmAUW8amj0MiJySqDcMCVh8');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;*/
+}
+
+/*.col-sm-4, .col-sm-8{
+    border: 2px solid pink;
+}*/
+
+/*#column{
+    padding-top:70px;
+    border: 2px solid pink
+}
+
+#column2 {
+    border: 2px solid pink
+}*/
+
+/*.btn{
+    background-color:aqua;
+}*/
+
+/*table modification*/
+/*td, th {
+    border: 0px solid black;
+    padding: 8px;
+    text-align: center;
+    width: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}*/
+
+/*tr:nth-child(even) {
+    background-color: ghostwhite;
+}
+
+tr:hover {
+    background-color: darkgray;
+}
+
+th {
+    text-align: center;
+    background-color: deeppink;
+    color: white;
+}*/
+
+/*punya ahlul*/
+/*.type-badge.flying {
+    background-color:pink
+}
+
+.type-badge {
+    background-color: lightpink
+}
+
+.pokemon-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    overflow-x: auto;
+    padding-top: 200px;
+    padding-left: 100px;
+    padding-right: 100px;
+    padding-bottom: 200px;
+}
+
+.pokemon-card {
+    border: 1px solid hotpink;
+    padding: 20px;
+    border-radius: 10px;
+    width: 250px;
+    height: 250px;
+    background-color: deeppink;
+    text-align: center;
+    transition: step-start 0,2s;
+}
+
+.pokemon-image {
+    max-width: 100px;
+    margin: 0 auto;
+    border-radius: 50%;
+    transition: ease-in-out 1s;
+}
+
+*/
+/*
+.progress {
+    position: relative;
+    height: 30px;
+    width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #007bff;
+    border-radius: 15px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black;
+    font-weight: bold;
+}
+
+@keyframes progressAnimation {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: 80%;
+    }
+}*/
+/**/
+
+/*.modal-body{
+    height:680px;
+}
+.modal-content {
+    width: 100%;
+    background-image: url('https://static.vecteezy.com/system/resources/previews/007/105/430/original/beautiful-colorful-gradient-background-combination-of-bright-colors-soft-and-smooth-texture-used-for-background-free-vector.jpg');
+}
+*/
+
+.carousel-indicators {
+    width: 300px;
+    height: 295px;
+    padding-top: 272px;
+    margin: auto;
+}
+
+.carousel-inner {
+    width: 300px;
+    height: 300px;
+    margin: auto;
+}
+
+.carousel[data-bs-ride] {
+        height: 300px;
+}
+
+.carousel-control-prev-icon {
+    background-color: black;
+}
+
+.carousel-control-next-icon {
+    background-color: black;
+}
+
+.list-group-item{
+    text-align:center;
+}
+
+#name {
+    text-transform: capitalize;
+    text-shadow: 2px 2px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 30px;
+}
+
+h2 {
+    text-align:center;
+}
+
+/*.wrapper .main-header {
+    position: fixed;
+    width: 100%;
+}
+*/
+
+.dt-buttons{
+    margin-bottom:20px
+}
+
+h2 {
+    text-transform: capitalize;
+    text-shadow: 2px 2px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 30px;
+}
